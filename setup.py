@@ -11,7 +11,7 @@ setuptools.setup(
     long_description=long_description,
     author="JoshGoA",
     url="https://github.com/JoshGoA/argdeco",
-    packages=setuptools.find_packages(),
+    py_modules=["argdeco"],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

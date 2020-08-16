@@ -1,4 +1,5 @@
 import argparse
+import functools
 
 import wrapt
 
@@ -20,8 +21,9 @@ def _callback(wrapped, instance, args, kwargs, /):
 
 def argument_parser(wrapped=None, /, *, cls=argparse.ArgumentParser, **kwargs):
     if wrapped is None:
-        return functools.partial(argument_parser, cls=cls, **kwargs)
+        return functools.partial(argument_parser, **kwargs, cls=cls)
     wrapped._namespace = argparse.Namespace(parser=cls(**kwargs), title_group_map={})
+    # TODO: RETURN CALLBACK WRAPPER IF CLASS ??
     return _callback(wrapped)
 
 
