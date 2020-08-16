@@ -9,7 +9,7 @@ def _callback(wrapped, instance, args, kwargs, /):
     def wrapper(*, parse_func=argparse.ArgumentParser.parse_args):
         return parse_func
 
-    # CHECK IF _NAMESPACE EXISTS
+    # TODO: CHECK IF _NAMESPACE EXISTS
     namespace = vars(wrapper(**kwargs)(wrapped._namespace.parser, *args))
     if (callback := namespace.pop("callback", None)) is None:
         return wrapped(**namespace)
@@ -28,7 +28,7 @@ def argument_parser(wrapped=None, /, *, cls=argparse.ArgumentParser, **kwargs):
 def _add_container(add_func, /, *args, name=None, group=None, **kwargs):
 
     def wrapper(wrapped, /):
-        # CHECK IF _NAMESPACE EXISTS
+        # TODO: CHECK IF _NAMESPACE EXISTS
         if (container := wrapped._namespace.parser if group is None
                          else wrapped._namespace.title_group_map.get(group, None)) is None:
             raise ValueError(f"unknown group {group}")
@@ -63,7 +63,7 @@ def add_mutually_exclusive_group(name, /, *args, group=None, **kwargs):
 def add_subparsers(wrapped=None, /, **kwargs):
     if wrapped is None:
         return functools.partial(add_subparsers, **kwargs)
-    # CHECK IF _NAMESPACE EXISTS
+    # TODO: CHECK IF _NAMESPACE EXISTS
     wrapped._namespace.parser.add_subparsers(**kwargs)
     return wrapped
 
@@ -77,7 +77,7 @@ def add_parser(callback, /, *args, **kwargs):
                 callback._namespace.parser.set_defaults(callback=wrapped)
                 return _callback(wrapped)
 
-    # CHECK IF _NAMESPACE EXISTS
+    # TODO: CHECK IF _NAMESPACE EXISTS
     if callback._namespace.parser._subparsers is None:
         callback._namespace.parser.error("unknown subparser arguments")
     return wrapper

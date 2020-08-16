@@ -1,8 +1,16 @@
 {
-	"folders": [
-		{
-			"path": "."
-		}
-	],
-	"settings": {}
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "extensions": {
+        "recommendations": [
+            "ms-python.python"
+        ]
+    },
+    "settings": {
+        "python.linting.mypyEnabled": true,
+        "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe"
+    }
 }
