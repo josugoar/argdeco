@@ -4,41 +4,45 @@ from typing import Any, Callable, Dict, Iterable, Mapping, Optional, Protocol, S
 
 import wrapt
 
-_T = TypeVar("_T")
-_TFunc = TypeVar("_TFunc", bound=Callable[..., _T])
-_N = TypeVar("_N")
-
-_Decorator = Callable[[_T], ArgumentDecorator[_TFunc]]
-_OptionalDecorator = Union[ArgumentDecorator[_TFunc],
-                           functools.partial[ArgumentDecorator[_TFunc]]]
+_TFunc = TypeVar("_TFunc", bound=Callable)
 
 
-class ArgumentDecorator(Protocol[_TFunc]):
-
+class _ArgumentDecorator(Protocol[_TFunc]):
     parser: argparse.ArgumentParser
-
-    _title_group_map: Dict[str, argparse._ArgumentGroup]
-
+    _groups: Dict[str, argparse._ArgumentGroup]
     __call__: _TFunc
 
 
-class ContainerAction(Protocol):
+class _ContainerAction(Protocol):
 
     @staticmethod
     def __call__(container: argparse._ActionsContainer,
-                 *args, **kwargs) -> Optional[argparse._ActionsContainer]: ...
+                 *args, **kwargs) -> Any: ...
+
+
+_TFuncArgumentDecorator = _ArgumentDecorator[_TFunc]
+
+_TFuncArgumentDecoratorWrapper = Callable[[_TFuncArgumentDecorator],
+                                          _TFuncArgumentDecorator]
+
+_OptionalDecorator = Union[_TFuncArgumentDecorator,
+                           functools.partial[_TFuncArgumentDecorator]]
 
 
 @wrapt.decorator
-def _callback(wrapped: ArgumentDecorator[_TFunc],
+def _callback(wrapped: _TFuncArgumentDecorator,
               instance: object,
               args, kwargs, /) -> Any:
 
-    def wrapper(args: Optional[Sequence[str]] = None,
-                namespace: Optional[argparse.Namespace] = None, *,
-                parse_func=argparse.ArgumentParser.parse_args) -> Tuple[Optional[Sequence[str]],
-                                                                        Optional[argparse.Namespace],
-                                                                        Callable]:
+    _TArgs = TypeVar("_TArgs", bound=Sequence[str])
+    _TNamespace = TypeVar("_TNamespace", bound=argparse.Namespace)
+
+    # TODO: overload parse_func
+    def wrapper(args: Optional[_TArgs] = None,
+                namespace: Optional[_TNamespace] = None, *,
+                parse_func: Callable = argparse.ArgumentParser.parse_args) -> Tuple[Optional[_TArgs],
+                                                                                    Optional[_TNamespace],
+                                                                                    Callable]:
         return args, namespace, parse_func
 
     *params, parse_func = wrapper(*args, **kwargs)
@@ -48,38 +52,48 @@ def _callback(wrapped: ArgumentDecorator[_TFunc],
     return callback(**attrs) if instance is None else callback(instance, **attrs)
 
 
+# def _optional_decorator(wrapped: Callable, **kwargs) -> _OptionalDecorator:
+#     if wrapped is None:
+#         return functools.partial(_optional_decorator, **kwargs)
+#     ...
+#     return
+
+
 def argument_parser(wrapped: Optional[_TFunc] = None, /, *,
                     cls: Type[argparse.ArgumentParser] = argparse.ArgumentParser,
                     **kwargs) -> _OptionalDecorator:
     if wrapped is None:
-        return functools.partial(cast(Callable[[_TFunc], ArgumentDecorator[_TFunc]], argument_parser), cls=cls, **kwargs)
-    argument_decorator = cast(ArgumentDecorator[_TFunc], wrapped)
+        return functools.partial(
+            cast(Callable[[_TFunc], _TFuncArgumentDecorator],
+                 argument_parser),
+            cls=cls, **kwargs
+        )
+    argument_decorator = cast(_TFuncArgumentDecorator, wrapped)
     argument_decorator.parser = cls(**kwargs)
-    argument_decorator._title_group_map = {}  # TODO: improve implementation detail
+    argument_decorator._groups = {}  # TODO: improve implementation detail
     return _callback(argument_decorator)
 
 
-def set_defaults(wrapped: Optional[ArgumentDecorator[_TFunc]] = None,
-                 **kwargs) -> _OptionalDecorator:
+def set_defaults(wrapped: Optional[_TFuncArgumentDecorator] = None, **kwargs) -> _OptionalDecorator:
     if wrapped is None:
-        return functools.partial(cast(Callable[..., ArgumentDecorator[_TFunc]], set_defaults), **kwargs)
+        return functools.partial(cast(_TFuncArgumentDecoratorWrapper, set_defaults), **kwargs)
     wrapped.parser.set_defaults(**kwargs)
     return wrapped
 
 
-def _add_container_actions(action: ContainerAction, /,
+def _add_container_actions(add_func: Callable, /,
                            *args,
                            name: Optional[str] = None,
                            group: Optional[str] = None,
                            **kwargs):
 
-    def wrapper(wrapped: ArgumentDecorator[_TFunc], /) -> ArgumentDecorator[_TFunc]:
+    def wrapper(wrapped: _TFuncArgumentDecorator, /) -> _TFuncArgumentDecorator:
         if (container := wrapped.parser if group is None
-                else wrapped._title_group_map.get(group, None)) is None:
+                else wrapped._groups.get(group, None)) is None:  # type: ignore
             raise ValueError(f"unknown group {group}")
-        container = action(container, *args, **kwargs)
+        action = add_func(container, *args, **kwargs)
         if name is not None:
-            wrapped._title_group_map[name] = container
+            wrapped._groups[name] = action
         return wrapped
 
     return wrapper
@@ -87,50 +101,39 @@ def _add_container_actions(action: ContainerAction, /,
 
 def add_argument(*args, group: str = None, **kwargs):
     return _add_container_actions(argparse._ActionsContainer.add_argument,
-                                  *args,
-                                  group=group,
-                                  **kwargs)
+                                  *args, group=group, **kwargs)
 
 
 def add_argument_group(name: str, /, *args, group: str = None, **kwargs):
     return _add_container_actions(argparse._ActionsContainer.add_argument_group,
-                                  *args,
-                                  name=name,
-                                  group=group,
-                                  **kwargs,)
+                                  *args, name=name, group=group, **kwargs)
 
 
 def add_mutually_exclusive_group(name: str, /, *args, group: str = None, **kwargs):
     return _add_container_actions(argparse._ActionsContainer.add_mutually_exclusive_group,
-                                  *args,
-                                  name=name,
-                                  group=group,
-                                  **kwargs,)
+                                  *args, name=name, group=group, **kwargs)
 
 
-def add_subparsers(wrapped: Optional[ArgumentDecorator[_TFunc]] = None, /,
-                   **kwargs) -> _OptionalDecorator:
+def add_subparsers(wrapped: Optional[_TFuncArgumentDecorator] = None, /, **kwargs) -> _OptionalDecorator:
     if wrapped is None:
-        return functools.partial(cast(Callable[[ArgumentDecorator[_TFunc]], ArgumentDecorator[_TFunc]], add_subparsers),
-                                 **kwargs)
+        return functools.partial(cast(_TFuncArgumentDecoratorWrapper, add_subparsers), **kwargs)
     wrapped.parser.add_subparsers(**kwargs)
     return wrapped
 
 
-def add_parser(callback: ArgumentDecorator[_TFunc], /,
-               *args, **kwargs):
+def add_parser(argument_decorator: _TFuncArgumentDecorator, /, *args, **kwargs):
 
     def wrapper(wrapped: _TFunc, /):
-        if (subparsers := callback.parser._subparsers) is None:
-            raise ValueError
+        if subparsers is None:
+            parser.error("unknown subparser")
         for action in subparsers._actions:
             if isinstance(action, argparse._SubParsersAction):
-                argument_decorator = cast(ArgumentDecorator[_TFunc], wrapped)
-                argument_decorator.parser = action.add_parser(*args, **kwargs)
-                argument_decorator._title_group_map = {}
-                callback.parser.set_defaults(callback=argument_decorator)
-                return _callback(argument_decorator)
+                callback = cast(_TFuncArgumentDecorator, wrapped)
+                callback.parser = action.add_parser(*args, **kwargs)
+                callback._groups = {}  # TODO: improve implementation detail
+                set_defaults(callback, callback=callback)
+                return _callback(callback)
 
-    if callback.parser._subparsers is None:
-        callback.parser.error("unknown subparser arguments")
+    parser = argument_decorator.parser
+    subparsers = parser._subparsers
     return wrapper
