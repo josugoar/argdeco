@@ -20,8 +20,7 @@ setuptools.setup(
         "Natural Language :: Basque",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.8",
-        "Topic :: Software Development :: Build Tools",
-        "Typing :: Typed"
+        "Topic :: Software Development :: Build Tools"
     ],
     package_data={"argdeco": ["*.md", "*.txt"]},
     license="MIT",
