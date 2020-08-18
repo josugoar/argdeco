@@ -10,7 +10,6 @@
         ]
     },
     "settings": {
-        "python.linting.mypyEnabled": true,
         "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe"
     }
 }

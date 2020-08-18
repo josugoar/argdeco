@@ -8,8 +8,8 @@ sdist = "python setup.py sdist"
 bdist_wheel = "python setup.py bdist_wheel"
 
 [dev-packages]
-mypy = "*"
 autopep8 = "*"
+pylint = "*"
 
 [packages]
 wrapt = "*"
