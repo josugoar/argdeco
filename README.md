@@ -107,9 +107,9 @@ optional arguments:
 ```py
 >>> # create the top-level parser
 ...
->>> @argdeco.add_subparsers(help='sub-command help')
-... @argdeco.add_argument('--foo', action='store_true', help='foo help')
-... @argdeco.argument_parser(prog='PROG')
+>>> @argdeco.add_subparsers(help="sub-command help")
+... @argdeco.add_argument("--foo", action="store_true", help="foo help")
+... @argdeco.argument_parser(prog="PROG")
 ... def parser(**kwargs):
 ...     print(parser)
 ...     print(kwargs)
@@ -119,8 +119,8 @@ optional arguments:
 ```py
 >>> # create the parser for the "a" command
 ...
->>> @argdeco.add_argument('bar', type=int, help='bar help')
-... @argdeco.add_parser(parser, 'a', help='a help')
+>>> @argdeco.add_argument("bar", type=int, help="bar help")
+... @argdeco.add_parser(parser, "a", help="a help")
 ... def parser_a(**kwargs):
 ...     print(parser_a)
 ...     print(kwargs)
@@ -130,8 +130,8 @@ optional arguments:
 ```py
 >>> # create the parser for the "a" command
 ...
->>> @argdeco.add_argument('--baz', choices='XYZ', help='baz help')
-... @argdeco.add_parser(parser, 'b', help='b help')
+>>> @argdeco.add_argument("--baz", choices="XYZ", help="baz help")
+... @argdeco.add_parser(parser, "b", help="b help")
 ... def parser_b(**kwargs):
 ...     print(parser_b)
 ...     print(kwargs)
@@ -141,12 +141,12 @@ optional arguments:
 ```py
 >>> # parse some argument lists
 ...
->>> parser(['a', '12'])
-ArgumentParser(prog='PROG a', usage=None, description=None, formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=True)
-{'foo': False, 'bar': 12}
->>> parser(['--foo', 'b', '--baz', 'Z'])
-ArgumentParser(prog='PROG b', usage=None, description=None, formatter_class=<class 'argparse.HelpFormatter'>, conflict_handler='error', add_help=True)
-{'foo': True, 'baz': 'Z'}
+>>> parser(["a", "12"])
+ArgumentParser(prog="PROG a", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
+{"foo": False, "bar": 12}
+>>> parser(["--foo", "b", "--baz", "Z"])
+ArgumentParser(prog="PROG b", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
+{"foo": True, "baz": "Z"}
 ```
 
 * **argdeco.add_argument_group**(title=None, description=None)
@@ -154,10 +154,10 @@ ArgumentParser(prog='PROG b', usage=None, description=None, formatter_class=<cla
     * By default, ArgumentParser groups command-line arguments into “positional arguments” and “optional arguments” when displaying help messages. When there is a better conceptual grouping of arguments than this default one, appropriate groups can be created using the add_argument_group() method:
 
 ```py
->>> @argdeco.add_argument('bar', group="group", help='bar help')
-... @argdeco.add_argument('--foo', group="group", help='foo help')
-... @argdeco.add_argument_group('group')
-... @argdeco.argument_parser(prog='PROG', add_help=False)
+>>> @argdeco.add_argument("bar", group="group", help="bar help")
+... @argdeco.add_argument("--foo", group="group", help="foo help")
+... @argdeco.add_argument_group("group")
+... @argdeco.argument_parser(prog="PROG", add_help=False)
 ... def parser(**kwargs):
 ...     pass
 ...
@@ -172,18 +172,18 @@ group:
 * **ardeco.add_mutually_exclusive_group**(required=False)
 
 ```py
->>> @argdeco.add_argument('--bar', group="mutually_exclusive_group", action='store_false')
-... @argdeco.add_argument('--foo', group="mutually_exclusive_group", action='store_true')
+>>> @argdeco.add_argument("--bar", group="mutually_exclusive_group", action="store_false")
+... @argdeco.add_argument("--foo", group="mutually_exclusive_group", action="store_true")
 ... @argdeco.add_mutually_exclusive_group("mutually_exclusive_group")
-... @argdeco.argument_parser(prog='PROG')
+... @argdeco.argument_parser(prog="PROG")
 ... def parser(**kwargs):
 ...     print(kwargs)
 ...
->>> parser(['--foo'])
-{'foo': True, 'bar': True}
->>> parser(['--bar'])
-{'foo': False, 'bar': False}
->>> parser(['--foo', '--bar'])
+>>> parser(["--foo"])
+{"foo": True, "bar": True}
+>>> parser(["--bar"])
+{"foo": False, "bar": False}
+>>> parser(["--foo", "--bar"])
 usage: PROG [-h] [--foo | --bar]
 PROG: error: argument --bar: not allowed with argument --foo
 ```
