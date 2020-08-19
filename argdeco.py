@@ -4,41 +4,65 @@ import functools
 import wrapt
 
 
-def with_optional_arguments(func, /):
+def _callback(wrapped, /, *, func):
 
-    def wrapper(wrapped=None, /, **kwargs):
-        return functools.partial(func, **kwargs) if wrapped is None else func(wrapped, **kwargs)
+    @wrapt.decorator
+    def wrapper(wrapped, instance, args, kwargs, /):
 
-    return wrapper
+        def parse_args(args=None, namespace=None):
+            return wrapped.parse_args(
+                args=args,
+                namespace=namespace
+            )
 
+        namespace = vars(parse_args(*args, **kwargs))
+        subcommand = namespace.pop("subcommand", None)
+        if subcommand is None:
+            return func(**namespace)
+        return subcommand(**namespace) if instance is None \
+            else subcommand(instance, **namespace)
 
-def _argument_decorator(parser, /):
-
-    def wrapper(wrapped, /):
-        parser._groups = {}
-        parser.__call__ = wrapped
-        return _parse_args(parser)  # pylint: disable=E1120
-
-    return wrapper
+    wrapped.func = func
+    wrapped._groups = {}
+    return wrapper(wrapped)
 
 
 def add_argument(*args, group=None, **kwargs):
-    return _add_container_actions(argparse._ActionsContainer.add_argument, *args, parent=group, **kwargs)
+    return _add_container_actions(
+        argparse._ActionsContainer.add_argument,
+        *args,
+        parent=group,
+        **kwargs
+    )
 
 
-def add_argument_group(name, /, *args, group=None, title=None, **kwargs):
-    return _add_container_actions(argparse._ActionsContainer.add_argument_group, *args, parent=group, child=name, title=name if title is None else title, **kwargs)
+def add_argument_group(name, /, *args, group=None, **kwargs):
+    return _add_container_actions(
+        argparse._ActionsContainer.add_argument_group,
+        *args,
+        parent=group,
+        child=name,
+        title=kwargs.pop("title", name),
+        **kwargs
+    )
 
 
-def add_mutually_exclusive_group(name, /, *args, group=None, **kwargs):
-    return _add_container_actions(argparse._ActionsContainer.add_mutually_exclusive_group, *args, parent=group, child=name, **kwargs)
+def add_mutually_exclusive_group(name, /, *, group=None, **kwargs):
+    return _add_container_actions(
+        argparse._ActionsContainer.add_mutually_exclusive_group,
+        parent=group,
+        child=name,
+        **kwargs
+    )
 
 
-def _add_container_actions(add_action, /, *args, parent=None, child=None, **kwargs):
+def _add_container_actions(func, /, *args, parent=None, child=None, **kwargs):
 
     def wrapper(wrapped, /):
-        container = add_action(wrapped if parent is None else wrapped._groups[parent],
-                               *args, **kwargs)
+        container = func(
+            wrapped if parent is None else wrapped._groups[parent],
+            *args, **kwargs
+        )
         if child is not None:
             wrapped._groups[child] = container
         return wrapped
@@ -46,34 +70,41 @@ def _add_container_actions(add_action, /, *args, parent=None, child=None, **kwar
     return wrapper
 
 
-@with_optional_arguments
-def argument_parser(wrapped, /, *, parser_class=argparse.ArgumentParser, description=None, **kwargs):
-    return _argument_decorator(parser_class(description=wrapped.__doc__ if description is None else description, **kwargs))(wrapped)
+def argument_parser(wrapped=None, /, *, parser_class=argparse.ArgumentParser, **kwargs):
+    if wrapped is None:
+        return functools.partial(
+            argument_parser,
+            parser_class=parser_class,
+            **kwargs
+        )
+    parser = parser_class(
+        description=kwargs.pop("description", wrapped.__doc__),
+        **kwargs
+    )
+    return _callback(parser, func=wrapped)
 
 
-@with_optional_arguments
-def add_subparsers(wrapped, /, **kwargs):
-    wrapped.add_subparsers(**kwargs)
-    return wrapped
+def add_subparsers(wrapped=None, /, **kwargs):
+    wrapper = _add_container_actions(
+        argparse.ArgumentParser.add_subparsers,
+        parser_class=kwargs.pop("parser_class", wrapped.__class__),
+        **kwargs
+    )
+    return wrapper if wrapped is None else wrapper(wrapped)
 
 
-def add_parser(parent, /, name=None, description=None, **kwargs):
+def add_parser(parent, /, name=None, **kwargs):
 
     def wrapper(wrapped, /):
-        (child := next(_argument_decorator(action.add_parser(wrapped.__name__ if name is None else name, description=wrapped.__doc__ if description is None else description, **kwargs))(wrapped)
-                       for action in parent._subparsers._actions if isinstance(action, argparse._SubParsersAction))).set_defaults(callback=wrapped)
-        return child
+        for action in parent._subparsers._actions:
+            if isinstance(action, argparse._SubParsersAction):
+                parser = action.add_parser(
+                    wrapped.__name__ if name is None else name,
+                    description=kwargs.pop("description", wrapped.__doc__),
+                    **kwargs
+                )
+                child = _callback(parser, func=wrapper)
+                child.set_defaults(subcommand=wrapped)
+                return child
 
     return wrapper
-
-
-@wrapt.decorator
-def _parse_args(wrapped, instance, args, kwargs, /):
-
-    def wrapper(args=None, namespace=None):
-        return wrapped.parse_args(args=args, namespace=namespace)
-
-    namespace = vars(wrapper(*args, **kwargs))
-    if (callback := namespace.pop("callback", None)) is None:
-        return wrapped(**namespace)
-    return callback(**namespace) if instance is None else callback(instance, **namespace)

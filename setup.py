@@ -6,8 +6,8 @@ with open(path.join(path.dirname(__file__), "README.md")) as f:
 
 setuptools.setup(
     name="argdeco",
-    version="0.9.0",
-    description="Stylish Decorator Syntax For Argparse",
+    version="1.0.0",
+    description="Unopinionated argparse wrapper",
     long_description=long_description,
     author="JoshGoA",
     url="https://github.com/JoshGoA/argdeco",

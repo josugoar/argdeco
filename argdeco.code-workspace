@@ -1,14 +1,14 @@
 {
-    "folders": [
-        {
-            "path": "."
-        }
-    ],
     "extensions": {
         "recommendations": [
             "ms-python.python"
         ]
     },
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
     "settings": {
         "python.pythonPath": "${workspaceFolder}/.venv/Scripts/python.exe"
     }
