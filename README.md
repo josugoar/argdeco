@@ -190,6 +190,8 @@ PROG: error: argument --bar: not allowed with argument --foo
 
 ## Advanced usage
 
+* **NOTE**: This is currently not supported due to bug [(fix)](https://stackoverflow.com/questions/1015307/python-bind-an-unbound-method).
+
 **argdeco** fully supports class method decoration, unlike most CLI decorator libraries.
 
 ```py
