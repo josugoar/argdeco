@@ -1,16 +1,17 @@
 import argparse
 import functools
+import types
 
 import wrapt
 
 
-def _callback(wrapped, /, *, func):
+def _callback(parser, /, *, func):
 
     @wrapt.decorator
     def wrapper(wrapped, instance, args, kwargs, /):
 
         def parse_args(args=None, namespace=None):
-            return wrapped.parse_args(
+            return parser.parse_args(
                 args=args,
                 namespace=namespace
             )
@@ -18,13 +19,15 @@ def _callback(wrapped, /, *, func):
         namespace = vars(parse_args(*args, **kwargs))
         subcommand = namespace.pop("subcommand", None)
         if subcommand is None:
-            return func(**namespace)
+            return wrapped(**namespace)
         return subcommand(**namespace) if instance is None \
             else subcommand(instance, **namespace)
 
-    wrapped.func = func
-    wrapped._groups = {}
-    return wrapper(wrapped)
+    parser.func = func
+    parser._groups = {}
+    parser.__class__.__get__ = lambda self, obj, objtype=None: \
+        types.MethodType(self.func, obj)
+    return wrapper(parser)
 
 
 def add_argument(*args, group=None, **kwargs):
@@ -103,7 +106,7 @@ def add_parser(parent, /, name=None, **kwargs):
                     description=kwargs.pop("description", wrapped.__doc__),
                     **kwargs
                 )
-                child = _callback(parser, func=wrapper)
+                child = _callback(parser, func=wrapped)
                 child.set_defaults(subcommand=wrapped)
                 return child
 
