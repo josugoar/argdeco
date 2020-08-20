@@ -4,11 +4,23 @@
 
 **NOTE**: The exact same decorating order as regular argparse *MUST* be respected
 
+## Why **argdeco**?
+
+The big majority of CLI decorator libraries do *NOT* support class method decoration, which directly makes them unusable for object oriented design. **argdeco**, however, circumvents the issue in an optimal way thanks to the wonderful work of [Graham Dumpleton](https://github.com/GrahamDumpleton) in his marvelous [wrapt](https://github.com/GrahamDumpleton/wrapt) decorator library (amazing work!).
+
+Many other similar libraries make the context or parser instance unaccesible or extremely intricate to navigate, which **argdeco** solves with a simple context flag that can be turned on and off at will. The behaviour is implemented using method binding, which makes it compliant with the programming language usage itself.
+
+Finally, **argdeco** is literally as simple as it gets when wrapping **argparse**. There are no extra confusing features, just exactly what regular **argparse** offers.
+
 ## API
 
-* **argdeco.argument_parser**(parser_class=argparse.ArgumentParser, prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars="-", fromfile_prefix_chars=None, argument_default=None, conflict_handler="error", add_help=True, allow_abbrev=True)
+* **argdeco.argument_parser**(parser_class=argparse.ArgumentParser, ctx=False, prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars="-", fromfile_prefix_chars=None, argument_default=None, conflict_handler="error", add_help=True, allow_abbrev=True)
 
     * Create a new ArgumentParser object. All parameters should be passed as keyword arguments. Each parameter has its own more detailed description below, but in short they are:
+
+        * parser_class - The class to instantiate the parser (default: argparse.ArgumentParser)
+
+        * ctx - Pass the context or parser instance to the callback callable (default: False)
 
         * prog - The name of the program (default: sys.argv[0])
 
@@ -172,9 +184,9 @@ group:
 * **ardeco.add_mutually_exclusive_group**(required=False)
 
 ```py
->>> @argdeco.add_argument("--bar", group="mutually_exclusive_group", action="store_false")
-... @argdeco.add_argument("--foo", group="mutually_exclusive_group", action="store_true")
-... @argdeco.add_mutually_exclusive_group("mutually_exclusive_group")
+>>> @argdeco.add_argument("--bar", group="group", action="store_false")
+... @argdeco.add_argument("--foo", group="group", action="store_true")
+... @argdeco.add_mutually_exclusive_group("group")
 ... @argdeco.argument_parser(prog="PROG")
 ... def parser(**kwargs):
 ...     print(kwargs)
@@ -190,7 +202,9 @@ PROG: error: argument --bar: not allowed with argument --foo
 
 ## Advanced usage
 
-**argdeco** fully supports class method decoration, unlike most CLI decorator libraries.
+### Class method decoration
+
+**argdeco** fully supports class method decoration, unlike the big majority of CLI decorator libraries.
 
 ```py
 >>> class Prog:
@@ -213,11 +227,40 @@ Decorating a class will forward the arguments to the *\_\_init__* method (usuall
 Decorating the *\_\_call__* method will forward the arguments to the class.
 
 ```py
->>> @argdeco.argument_parser
-... class Prog:
+>>> class Prog:
 ...
 ...     @argdeco.argument_parser
 ...     def __call__(self):
 ...         pass
 ...
+```
+
+### Context
+
+Decorated callback callables can get access to the *argparse* context or parser instance.
+
+```py
+>>> @argdeco.argument_parser(ctx=True, prog="PROG")
+... def parser(ctx):
+...     ctx.print_help()
+...
+usage: PROG [-h]
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+Class method context or parser instance forwarding is still respected on decorated class methods.
+
+```py
+>>> class Prog:
+...
+...     @argdeco.argument_parser(ctx=True, prog="PROG")
+...     def __call__(self, ctx):
+...         ctx.print_help()
+...
+usage: PROG [-h]
+
+optional arguments:
+  -h, --help  show this help message and exit
 ```
