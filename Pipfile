@@ -4,12 +4,13 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [scripts]
-sdist = "python setup.py sdist"
-bdist_wheel = "python setup.py bdist_wheel"
+build = "python setup.py sdist bdist_wheel"
+upload = "python -m twine upload dist/*"
 
 [dev-packages]
 autopep8 = "*"
 pylint = "*"
+twine = "*"
 
 [packages]
 wrapt = "*"

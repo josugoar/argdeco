@@ -5,10 +5,11 @@ with open(path.join(path.dirname(__file__), "README.md"), encoding="utf8") as f:
     long_description = f.read()
 
 setuptools.setup(
-    name="argdeco",
-    version="1.1.0",
+    name="argdeco-JoshGoA",
+    version="1.1.1",
     description="Unopinionated argparse wrapper",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     author="JoshGoA",
     url="https://github.com/JoshGoA/argdeco",
     py_modules=["argdeco"],

@@ -16,6 +16,16 @@ This question is easy to answer: because there is not a single command line util
 
 * shares the *EXACT* same API as **argparse** using decorators
 
+## Installation
+
+You can get the library directly from PyPI:
+
+```sh
+$ pip install argdeco
+```
+
+The installation into a [virtualenv](https://github.com/pypa/virtualenv) (or [pipenv](https://github.com/pypa/pipenv)) is heavily recommended.
+
 ## API reference
 
 * **argdeco.argument_parser**(wrapped=None, parser_class=argparse.ArgumentParser, ctx=False, prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars="-", fromfile_prefix_chars=None, argument_default=None, conflict_handler="error", add_help=True, allow_abbrev=True)
