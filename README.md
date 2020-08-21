@@ -141,7 +141,7 @@ optional arguments:
 ... @argdeco.add_argument("--foo", action="store_true", help="foo help")
 ... @argdeco.argument_parser(prog="PROG")
 ... def parser(**kwargs):
-...     print(parser)
+...     print("parser")
 ...     print(kwargs)
 ...
 ```
@@ -152,7 +152,7 @@ optional arguments:
 >>> @argdeco.add_argument("bar", type=int, help="bar help")
 ... @argdeco.add_parser(parser, "a", help="a help")
 ... def parser_a(**kwargs):
-...     print(parser_a)
+...     print("parser_a")
 ...     print(kwargs)
 ...
 ```
@@ -163,7 +163,7 @@ optional arguments:
 >>> @argdeco.add_argument("--baz", choices="XYZ", help="baz help")
 ... @argdeco.add_parser(parser, "b", help="b help")
 ... def parser_b(**kwargs):
-...     print(parser_b)
+...     print("parser_b")
 ...     print(kwargs)
 ...
 ```
@@ -172,10 +172,10 @@ optional arguments:
 >>> # parse some argument lists
 ...
 >>> parser(["a", "12"])
-ArgumentParser(prog="PROG a", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
+parser_a
 {"foo": False, "bar": 12}
 >>> parser(["--foo", "b", "--baz", "Z"])
-ArgumentParser(prog="PROG b", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
+parser_b
 {"foo": True, "baz": "Z"}
 ```
 
