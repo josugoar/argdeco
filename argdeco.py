@@ -14,23 +14,21 @@ class ArgumentDecorator(wrapt.ObjectProxy):
         super().__init__(wrapped)
         self.callback = callback
         self._self_ctx = ctx
-        self._self_groups = {}
+        self._self_containers = {}
 
     @property
-    def _groups(self, /):
-        return self._self_groups
+    def _containers(self, /):
+        return self._self_containers
 
     @wrapt.decorator
     def wrapper(self, wrapped, instance, args, kwargs, /):
         namespace = vars(self.parse_args(*args, **kwargs))
         subcommand = namespace.pop("subcommand", None)
-        if subcommand is None:
-            callback = wrapped
-        else:
-            callback = types.MethodType(subcommand, instance)
+        if subcommand is not None:
+            wrapped = types.MethodType(subcommand, instance)
         if self._self_ctx:
-            callback = types.MethodType(callback, self.__wrapped__)
-        return callback(**namespace)
+            wrapped = types.MethodType(wrapped, self.__wrapped__)
+        return wrapped(**namespace)
 
     def __get__(self, instance, owner=None, /):
         if instance is not None:
@@ -49,11 +47,11 @@ def add_argument(*args, group=None, **kwargs):
 
 
 def add_argument_group(name, /, *args, group=None, **kwargs):
+    kwargs.setdefault("title", name)
     return _add_container_actions(argparse._ActionsContainer.add_argument_group,
                                   *args,
                                   parent=group,
                                   child=name,
-                                  title=kwargs.pop("title", name),
                                   **kwargs)
 
 
@@ -64,13 +62,13 @@ def add_mutually_exclusive_group(name, /, *, group=None, **kwargs):
                                   **kwargs)
 
 
-def _add_container_actions(func, /, *args, parent=None, child=None, **kwargs):
+def _add_container_actions(add, /, *args, parent=None, child=None, **kwargs):
 
     def wrapper(wrapped, /):
-        instance = wrapped if parent is None else wrapped._groups[parent]
-        container = func(instance, *args, **kwargs)
+        instance = wrapped if parent is None else wrapped._containers[parent]
+        container = add(instance, *args, **kwargs)
         if child is not None:
-            wrapped._groups[child] = container
+            wrapped._containers[child] = container
         return wrapped
 
     return wrapper

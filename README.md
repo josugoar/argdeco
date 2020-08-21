@@ -2,49 +2,55 @@
 
 > Unopinionated argparse wrapper
 
-**NOTE**: The exact same decorating order as regular argparse *MUST* be respected
+**NOTE**: The *EXACT* same decorating order as regular argparse *MUST* be respected
 
 ## Why **argdeco**?
 
-The big majority of CLI decorator libraries do *NOT* support class method decoration, which directly makes them unusable for object oriented design. **argdeco**, however, circumvents the issue in an optimal way thanks to the wonderful work of [Graham Dumpleton](https://github.com/GrahamDumpleton) in his marvelous [wrapt](https://github.com/GrahamDumpleton/wrapt) decorator library (amazing work!).
+There are so many libraries out there for writing command line utilities; why does **argdeco** exist?
 
-Many other similar libraries make the context or parser instance unaccesible or extremely intricate to navigate, which **argdeco** solves with a simple context flag that can be turned on and off at will. The behaviour is implemented using method binding, which makes it compliant with the programming language usage itself.
+This question is easy to answer: because there is not a single command line utility for Python out there which ticks the following boxes: ([sound familiar?](https://click.palletsprojects.com/en/7.x/why/))
 
-Finally, **argdeco** is literally as simple as it gets when wrapping **argparse**. There are no extra confusing features, just exactly what regular **argparse** offers.
+* supports class callback method decoration and method instance binding with class instance forwarding (thank you [Graham Dumpleton](https://github.com/GrahamDumpleton) for [wrapt](https://github.com/GrahamDumpleton/wrapt)!)
 
-## API
+* supports callback callable instance binding with context or parser instance forwarding
 
-* **argdeco.argument_parser**(parser_class=argparse.ArgumentParser, ctx=False, prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars="-", fromfile_prefix_chars=None, argument_default=None, conflict_handler="error", add_help=True, allow_abbrev=True)
+* shares the *EXACT* same API as **argparse** using decorators
 
-    * Create a new ArgumentParser object. All parameters should be passed as keyword arguments. Each parameter has its own more detailed description below, but in short they are:
+## API reference
 
-        * parser_class - The class to instantiate the parser (default: argparse.ArgumentParser)
+* **argdeco.argument_parser**(wrapped=None, parser_class=argparse.ArgumentParser, ctx=False, prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars="-", fromfile_prefix_chars=None, argument_default=None, conflict_handler="error", add_help=True, allow_abbrev=True)
 
-        * ctx - Pass the context or parser instance to the callback callable (default: False)
+  * Create a new ArgumentParser object. All parameters should be passed as keyword arguments. Each parameter has its own more detailed description below, but in short they are:
 
-        * prog - The name of the program (default: sys.argv[0])
+      * wrapped - The callback callable (default: None)
 
-        * usage - The string describing the program usage (default: generated from arguments added to parser)
+      * parser_class - The class to instantiate the parser (default: argparse.ArgumentParser)
 
-        * description - Text to display before the argument help (default: __doc__)
+      * ctx - Pass the context or parser instance to the callback callable (default: False)
 
-        * epilog - Text to display after the argument help (default: none)
+      * prog - The name of the program (default: sys.argv[0])
 
-        * parents - A list of ArgumentParser objects whose arguments should also be included
+      * usage - The string describing the program usage (default: generated from arguments added to parser)
 
-        * formatter_class - A class for customizing the help output
+      * description - Text to display before the argument help (default: __doc__)
 
-        * prefix_chars - The set of characters that prefix optional arguments (default: "-")
+      * epilog - Text to display after the argument help (default: none)
 
-        * fromfile_prefix_chars - The set of characters that prefix files from which additional arguments should be read (default: None)
+      * parents - A list of ArgumentParser objects whose arguments should also be included
 
-        * argument_default - The global default value for arguments (default: None)
+      * formatter_class - A class for customizing the help output
 
-        * conflict_handler - The strategy for resolving conflicting optionals (usually unnecessary)
+      * prefix_chars - The set of characters that prefix optional arguments (default: "-")
 
-        * add_help - Add a -h/--help option to the parser (default: True)
+      * fromfile_prefix_chars - The set of characters that prefix files from which additional arguments should be read (default: None)
 
-        * allow_abbrev - Allows long options to be abbreviated if the abbreviation is unambiguous. (default: True)
+      * argument_default - The global default value for arguments (default: None)
+
+      * conflict_handler - The strategy for resolving conflicting optionals (usually unnecessary)
+
+      * add_help - Add a -h/--help option to the parser (default: True)
+
+      * allow_abbrev - Allows long options to be abbreviated if the abbreviation is unambiguous. (default: True)
 
 ```py
 >>> import argdeco
@@ -56,7 +62,7 @@ Finally, **argdeco** is literally as simple as it gets when wrapping **argparse*
 ```
 
 ```py
->>> cli(["--help"])
+>>> parser(["--help"])
 usage: myprogram.py [-h] [--foo FOO]
 
 optional arguments:
@@ -66,55 +72,57 @@ optional arguments:
 
 * **argdeco.add_argument**(name or flags..., group=None, [, action][, nargs][, const][, default][, type][, choices][, required][, help][, metavar][, dest])
 
-    * Define how a single command-line argument should be parsed. Each parameter has its own more detailed description below, but in short they are:
+  * Define how a single command-line argument should be parsed. Each parameter has its own more detailed description below, but in short they are:
 
-        * name or flags - Either a name or a list of option strings, e.g. foo or -f, --foo.
+    * name or flags - Either a name or a list of option strings, e.g. foo or -f, --foo.
 
-        * group - The group to add the argument. (default: None)
+    * group - The group to add the argument. (default: None)
 
-        * action - The basic type of action to be taken when this argument is encountered at the command line.
+    * action - The basic type of action to be taken when this argument is encountered at the command line.
 
-        * nargs - The number of command-line arguments that should be consumed.
+    * nargs - The number of command-line arguments that should be consumed.
 
-        * const - A constant value required by some action and nargs selections.
+    * const - A constant value required by some action and nargs selections.
 
-        * default - The value produced if the argument is absent from the command line.
+    * default - The value produced if the argument is absent from the command line.
 
-        * type - The type to which the command-line argument should be converted.
+    * type - The type to which the command-line argument should be converted.
 
-        * choices - A container of the allowable values for the argument.
+    * choices - A container of the allowable values for the argument.
 
-        * required - Whether or not the command-line option may be omitted (optionals only).
+    * required - Whether or not the command-line option may be omitted (optionals only).
 
-        * help - A brief description of what the argument does.
+    * help - A brief description of what the argument does.
 
-        * metavar - A name for the argument in usage messages.
+    * metavar - A name for the argument in usage messages.
 
-        * dest - The name of the attribute to be added to the object returned by parse_args().
+    * dest - The name of the attribute to be added to the object returned by parse_args().
 
-* **argdeco.add_subparsers**([title][, description][, prog][, parser_class][, action][, option_string][, dest][, required][, help][, metavar])
+* **argdeco.add_subparsers**(wrapped=None, [title][, description][, prog][, parser_class][, action][, option_string][, dest][, required][, help][, metavar])
 
-    * Many programs split up their functionality into a number of sub-commands, for example, the svn program can invoke sub-commands like svn checkout, svn update, and svn commit. Splitting up functionality this way can be a particularly good idea when a program performs several different functions which require different kinds of command-line arguments. ArgumentParser supports the creation of such sub-commands with the add_subparsers() method. The add_subparsers() method is normally called with no arguments and returns a special action object. This object has a single method, add_parser(), which takes a command name and any ArgumentParser constructor arguments, and returns an ArgumentParser object that can be modified as usual.
+  * Many programs split up their functionality into a number of sub-commands, for example, the svn program can invoke sub-commands like svn checkout, svn update, and svn commit. Splitting up functionality this way can be a particularly good idea when a program performs several different functions which require different kinds of command-line arguments. ArgumentParser supports the creation of such sub-commands with the add_subparsers() method. The add_subparsers() method is normally called with no arguments and returns a special action object. This object has a single method, add_parser(), which takes a command name and any ArgumentParser constructor arguments, and returns an ArgumentParser object that can be modified as usual.
 
-    * Description of parameters:
+  * Description of parameters:
 
-        * title - title for the sub-parser group in help output; by default “subcommands” if description is provided, otherwise uses title for positional arguments
+    * wrapped - The callback callable (default: None)
 
-        * description - description for the sub-parser group in help output, by default None
+    * title - title for the sub-parser group in help output; by default “subcommands” if description is provided, otherwise uses title for positional arguments
 
-        * prog - usage information that will be displayed with sub-command help, by default the name of the program and any positional arguments before the subparser argument
+    * description - description for the sub-parser group in help output, by default None
 
-        * parser_class - class which will be used to create sub-parser instances, by default the class of the current parser (e.g. ArgumentParser)
+    * prog - usage information that will be displayed with sub-command help, by default the name of the program and any positional arguments before the subparser argument
 
-        * action - the basic type of action to be taken when this argument is encountered at the command line
+    * parser_class - class which will be used to create sub-parser instances, by default the class of the current parser (e.g. ArgumentParser)
 
-        * dest - name of the attribute under which sub-command name will be stored; by default None and no value is stored
+    * action - the basic type of action to be taken when this argument is encountered at the command line
 
-        * required - Whether or not a subcommand must be provided, by default False (added in 3.7)
+    * dest - name of the attribute under which sub-command name will be stored; by default None and no value is stored
 
-        * help - help for sub-parser group in help output, by default None
+    * required - Whether or not a subcommand must be provided, by default False (added in 3.7)
 
-        * metavar - string presenting available sub-commands in help; by default it is None and presents sub-commands in form {cmd1, cmd2, ..}
+    * help - help for sub-parser group in help output, by default None
+
+    * metavar - string presenting available sub-commands in help; by default it is None and presents sub-commands in form {cmd1, cmd2, ..}
 
 ```py
 >>> # create the top-level parser
@@ -163,7 +171,7 @@ ArgumentParser(prog="PROG b", usage=None, description=None, formatter_class=<cla
 
 * **argdeco.add_argument_group**(title=None, description=None)
 
-    * By default, ArgumentParser groups command-line arguments into “positional arguments” and “optional arguments” when displaying help messages. When there is a better conceptual grouping of arguments than this default one, appropriate groups can be created using the add_argument_group() method:
+  * By default, ArgumentParser groups command-line arguments into “positional arguments” and “optional arguments” when displaying help messages. When there is a better conceptual grouping of arguments than this default one, appropriate groups can be created using the add_argument_group() method:
 
 ```py
 >>> @argdeco.add_argument("bar", group="group", help="bar help")
@@ -204,7 +212,7 @@ PROG: error: argument --bar: not allowed with argument --foo
 
 ### Class method decoration
 
-**argdeco** fully supports class method decoration, unlike the big majority of CLI decorator libraries.
+**argdeco** supports class callback method decoration, unlike the big majority of CLI decorator libraries, without any difference as regular callback callable decoration.
 
 ```py
 >>> class Prog:
@@ -215,7 +223,7 @@ PROG: error: argument --bar: not allowed with argument --foo
 ...
 ```
 
-Decorating a class will forward the arguments to the *\_\_init__* method (usually not the desired behaviour).
+Decorating a class will forward the arguments to the *\_\_init__* method (usually not the desired behaviour), as decorated callbacks will *ALWAYS* be treated as callables.
 
 ```py
 >>> @argdeco.argument_parser
@@ -224,7 +232,7 @@ Decorating a class will forward the arguments to the *\_\_init__* method (usuall
 ...
 ```
 
-Decorating the *\_\_call__* method will forward the arguments to the class.
+Decorating the *\_\_call__* method will forward the arguments to the class itself, following standard decorator usage as specified by [wrapt](https://wrapt.readthedocs.io/en/latest/decorators.html#decorating-class-methods).
 
 ```py
 >>> class Prog:
@@ -237,20 +245,21 @@ Decorating the *\_\_call__* method will forward the arguments to the class.
 
 ### Context
 
-Decorated callback callables can get access to the *argparse* context or parser instance.
+Decorated callback callables can get access to the **argparse** context or parser instance.
 
 ```py
 >>> @argdeco.argument_parser(ctx=True, prog="PROG")
 ... def parser(ctx):
 ...     ctx.print_help()
 ...
+>>> parser([])
 usage: PROG [-h]
 
 optional arguments:
   -h, --help  show this help message and exit
 ```
 
-Class method context or parser instance forwarding is still respected on decorated class methods.
+Class callback method context or parser instance forwarding is still respected on decorated class methods.
 
 ```py
 >>> class Prog:
@@ -259,6 +268,8 @@ Class method context or parser instance forwarding is still respected on decorat
 ...     def __call__(self, ctx):
 ...         ctx.print_help()
 ...
+>>> prog = Prog()
+>>> prog([])
 usage: PROG [-h]
 
 optional arguments:
