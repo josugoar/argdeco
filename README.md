@@ -253,7 +253,7 @@ Decorating the *\_\_call__* method will forward the arguments to the class itsel
 ...
 ```
 
-### Context
+### Context forwarding
 
 Decorated callback callables can get access to the **argparse** context or parser instance.
 
