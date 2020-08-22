@@ -12,7 +12,7 @@ This question is easy to answer: because there is not a single command line util
 
 * supports class callback method decoration and method instance binding with class instance forwarding (thank you [Graham Dumpleton](https://github.com/GrahamDumpleton) for [wrapt](https://github.com/GrahamDumpleton/wrapt)!)
 
-* supports callback callable instance binding with context or parser instance forwarding
+* supports callback callable instance binding with **argparse** context or parser instance forwarding
 
 * shares the *EXACT* same API as **argparse** using decorators
 
@@ -21,7 +21,7 @@ This question is easy to answer: because there is not a single command line util
 You can get the library directly from PyPI:
 
 ```sh
-$ pip install argdeco
+$ pip install argdeco-JoshGoA
 ```
 
 The installation into a [virtualenv](https://github.com/pypa/virtualenv) (or [pipenv](https://github.com/pypa/pipenv)) is heavily recommended.
@@ -36,7 +36,7 @@ The installation into a [virtualenv](https://github.com/pypa/virtualenv) (or [pi
 
       * parser_class - The class to instantiate the parser (default: argparse.ArgumentParser)
 
-      * ctx - Pass the context or parser instance to the callback callable (default: False)
+      * ctx - Pass the **argparse** context or parser instance to the callback callable (default: False)
 
       * prog - The name of the program (default: sys.argv[0])
 
@@ -141,7 +141,7 @@ optional arguments:
 ... @argdeco.add_argument("--foo", action="store_true", help="foo help")
 ... @argdeco.argument_parser(prog="PROG")
 ... def parser(**kwargs):
-...     print(parser)
+...     print("parser")
 ...     print(kwargs)
 ...
 ```
@@ -152,7 +152,7 @@ optional arguments:
 >>> @argdeco.add_argument("bar", type=int, help="bar help")
 ... @argdeco.add_parser(parser, "a", help="a help")
 ... def parser_a(**kwargs):
-...     print(parser_a)
+...     print("parser_a")
 ...     print(kwargs)
 ...
 ```
@@ -163,7 +163,7 @@ optional arguments:
 >>> @argdeco.add_argument("--baz", choices="XYZ", help="baz help")
 ... @argdeco.add_parser(parser, "b", help="b help")
 ... def parser_b(**kwargs):
-...     print(parser_b)
+...     print("parser_b")
 ...     print(kwargs)
 ...
 ```
@@ -172,10 +172,10 @@ optional arguments:
 >>> # parse some argument lists
 ...
 >>> parser(["a", "12"])
-ArgumentParser(prog="PROG a", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
+parser_a
 {"foo": False, "bar": 12}
 >>> parser(["--foo", "b", "--baz", "Z"])
-ArgumentParser(prog="PROG b", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
+parser_b
 {"foo": True, "baz": "Z"}
 ```
 
@@ -219,6 +219,21 @@ PROG: error: argument --bar: not allowed with argument --foo
 ```
 
 ## Advanced usage
+
+### Accessing attributes
+
+**argdeco** does *NOT* override decorated functions so that they can be accessed by the user easily if needed. In order to access the **argparse** context or parser instance, it is recommended to use context forwarding.
+
+```py
+>>> @argdeco.argument_parser
+... def prog(self):
+...     pass
+...
+>>> prog.__wrapped__
+<function prog at 0x0000029BCBFABF70>
+>>> prog.parser
+ArgumentParser(prog="argdeco.py", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
+```
 
 ### Class method decoration
 
