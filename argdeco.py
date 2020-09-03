@@ -63,10 +63,12 @@ def argument_parser(wrapped=None, /, *, parser_class=argparse.ArgumentParser,
 
 
 def add_subparsers(wrapped=None, /, **kwargs):
+    if wrapped is None:
+        return functools.partial(add_subparsers, **kwargs)
     kwargs.setdefault("parser_class", wrapped.parser.__class__)
     wrapper = _add_container_actions(argparse.ArgumentParser.add_subparsers,
                                      **kwargs)
-    return wrapper if wrapped is None else wrapper(wrapped)
+    return wrapper(wrapped)
 
 
 def add_parser(parent, /, name=None, ctx=False, **kwargs):
