@@ -1,10 +1,16 @@
-# argdeco
+<div style="text-align:center">
+  <img src="argdeco.svg" />
+</div>
+
+<h1></h1>
 
 > Unopinionated argparse wrapper
 
-**NOTE**: The *EXACT* same decorating order as regular argparse *MUST* be respected
+**NOTE**: The EXACT same decorating order as regular **argparse** MUST be respected
 
-## Why **argdeco**?
+**NOTE**: It is recommended to install the development version directly from the repository
+
+# Why **argdeco**?
 
 There are so many libraries out there for writing command line utilities; why does **argdeco** exist?
 
@@ -14,9 +20,9 @@ This question is easy to answer: because there is not a single command line util
 
 * supports callback callable instance binding with **argparse** context or parser instance forwarding
 
-* shares the *EXACT* same API as **argparse** using decorators
+* shares the EXACT same API as **argparse** using decorators
 
-## Installation
+# Installation
 
 You can get the library directly from PyPI:
 
@@ -26,7 +32,7 @@ $ pip install argdeco-JoshGoA
 
 The installation into a [virtualenv](https://github.com/pypa/virtualenv) (or [pipenv](https://github.com/pypa/pipenv)) is heavily recommended.
 
-## API reference
+# API reference
 
 * **argdeco.argument_parser**(wrapped=None, parser_class=argparse.ArgumentParser, ctx=False, prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars="-", fromfile_prefix_chars=None, argument_default=None, conflict_handler="error", add_help=True, allow_abbrev=True)
 
@@ -136,7 +142,6 @@ optional arguments:
 
 ```py
 >>> # create the top-level parser
-...
 >>> @argdeco.add_subparsers(help="sub-command help")
 ... @argdeco.add_argument("--foo", action="store_true", help="foo help")
 ... @argdeco.argument_parser(prog="PROG")
@@ -148,7 +153,6 @@ optional arguments:
 
 ```py
 >>> # create the parser for the "a" command
-...
 >>> @argdeco.add_argument("bar", type=int, help="bar help")
 ... @argdeco.add_parser(parser, "a", help="a help")
 ... def parser_a(**kwargs):
@@ -159,7 +163,6 @@ optional arguments:
 
 ```py
 >>> # create the parser for the "a" command
-...
 >>> @argdeco.add_argument("--baz", choices="XYZ", help="baz help")
 ... @argdeco.add_parser(parser, "b", help="b help")
 ... def parser_b(**kwargs):
@@ -170,7 +173,6 @@ optional arguments:
 
 ```py
 >>> # parse some argument lists
-...
 >>> parser(["a", "12"])
 parser_a
 {"foo": False, "bar": 12}
@@ -218,11 +220,11 @@ usage: PROG [-h] [--foo | --bar]
 PROG: error: argument --bar: not allowed with argument --foo
 ```
 
-## Advanced usage
+# Advanced usage
 
-### Accessing attributes
+## Accessing attributes
 
-**argdeco** does *NOT* override decorated functions so that they can be accessed by the user easily if needed. In order to access the **argparse** context or parser instance, it is recommended to use context forwarding.
+**argdeco** does NOT override decorated functions so that they can be accessed by the user easily if needed. In order to access the **argparse** context or parser instance, it is recommended to use context forwarding.
 
 ```py
 >>> @argdeco.argument_parser
@@ -235,7 +237,7 @@ PROG: error: argument --bar: not allowed with argument --foo
 ArgumentParser(prog="argdeco.py", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
 ```
 
-### Class method decoration
+## Class method decoration
 
 **argdeco** supports class callback method decoration, unlike the big majority of CLI decorator libraries, without any difference as regular callback callable decoration.
 
@@ -248,7 +250,7 @@ ArgumentParser(prog="argdeco.py", usage=None, description=None, formatter_class=
 ...
 ```
 
-Decorating a class will forward the arguments to the *\_\_init__* method (usually not the desired behaviour), as decorated callbacks will *ALWAYS* be treated as callables.
+Decorating a class will forward the arguments to the *\_\_init__* method (usually not the desired behaviour), as decorated callbacks will ALWAYS be treated as callables.
 
 ```py
 >>> @argdeco.argument_parser
@@ -268,7 +270,7 @@ Decorating the *\_\_call__* method will forward the arguments to the class itsel
 ...
 ```
 
-### Context forwarding
+## Context forwarding
 
 Decorated callback callables can get access to the **argparse** context or parser instance.
 
