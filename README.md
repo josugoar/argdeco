@@ -1,6 +1,6 @@
-<div style="text-align:center">
+<p align="center">
   <img src="argdeco.svg" />
-</div>
+</p>
 
 <h1></h1>
 
