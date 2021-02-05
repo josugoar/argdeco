@@ -5,13 +5,13 @@ with open(path.join(path.dirname(__file__), "README.md"), encoding="utf8") as f:
     long_description = f.read()
 
 setuptools.setup(
-    name="argdeco-JoshGoA",
+    name="argdeco-josugoar",
     version="1.2.1",
     description="Unopinionated argparse wrapper",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="JoshGoA",
-    url="https://github.com/JoshGoA/argdeco",
+    author="josugoar",
+    url="https://github.com/josugoar/argdeco",
     py_modules=["argdeco"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -26,10 +26,10 @@ setuptools.setup(
         "Topic :: Documentation",
         "Topic :: Software Development :: Libraries :: Python Modules"
     ],
-    package_data={"argdeco": ["*.md", "*.txt"]},
+    package_data={"argdeco": ["LICENSE", "README.md"]},
     license="MIT",
-    keywords="argparse wrapt",
-    project_urls={"Source": "https://github.com/pypa/argdeco"},
+    keywords="python argparse wrapt",
+    project_urls={"Source": "https://github.com/josugoar/argdeco"},
     install_requires=["wrapt"],
     python_requires=">=3.8"
 )
