@@ -1,4 +1,1 @@
-.venv/
-*.egg-info/
-build/
-dist/
+.devcontainer/
