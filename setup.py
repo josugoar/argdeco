@@ -6,7 +6,7 @@ with open(path.join(path.dirname(__file__), "README.md"), encoding="utf8") as f:
 
 setuptools.setup(
     name="argdeco-josugoar",
-    version="1.2.1",
+    version="1.3.0",
     description="Unopinionated argparse wrapper",
     long_description=long_description,
     long_description_content_type="text/markdown",
