@@ -1,5 +1,5 @@
-<p style="text-align: center;">
-  <img src="argdeco.svg" />
+<p align="center">
+  <img alt="argdeco" src="argdeco.svg" />
 </p>
 
 <h1></h1>
