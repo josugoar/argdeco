@@ -5,8 +5,8 @@ verify_ssl = true
 
 [scripts]
 build = "python setup.py sdist bdist_wheel"
-upload_testpypi = "python -m twine upload --repository testpypi dist/*"
-upload_pypi = "python -m twine upload dist/*"
+test = "python -m twine upload --repository testpypi dist/*"
+upload = "python -m twine upload dist/*"
 
 [dev-packages]
 autopep8 = "*"
