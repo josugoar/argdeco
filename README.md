@@ -2,6 +2,8 @@
   <img alt="argdeco" src="assets/argdeco.svg" />
 </p>
 
+<h1></h1>
+
 > Unopinionated argparse wrapper
 
 **NOTE**: The EXACT same decorating order as regular **argparse** MUST be respected
