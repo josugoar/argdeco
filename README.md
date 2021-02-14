@@ -1,14 +1,14 @@
 <p align="center">
-  <img alt="argdeco" src="assets/argdeco.svg" />
+  <img src="assets/argdeco.svg" alt="argdeco" width="640" height="320" />
 </p>
 
-> Unopinionated argparse wrapper
+> Unopinionated **argparse** wrapper
 
-**NOTE**: The EXACT same decorating order as regular **argparse** MUST be respected
+* The EXACT same decorating order as regular **argparse** MUST be respected
 
-**NOTE**: It is recommended to install the development version directly from the repository
+* It is recommended to install the development version directly from the repository
 
-# Why **argdeco**?
+# Why argdeco?
 
 There are so many libraries out there for writing command line utilities; why does **argdeco** exist?
 
