@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/argdeco.svg" alt="argdeco" width="640" height="320" />
+  <img src="assets/argdeco.png" alt="argdeco" width="640" height="320" />
 </p>
 
 <h1></h1>
