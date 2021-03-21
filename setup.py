@@ -28,7 +28,7 @@ setuptools.setup(
     ],
     package_data={"argdeco": ["LICENSE", "README.md"]},
     license="MIT",
-    keywords="python pip argparse wrapt",
+    keywords="argparse cli library parsing pip python terminal wrapt",
     project_urls={"Source": "https://github.com/josugoar/argdeco"},
     install_requires=["wrapt"],
     python_requires=">=3.8"
