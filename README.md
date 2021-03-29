@@ -27,7 +27,7 @@ This question is easy to answer: because there is not a single command line util
 You can get the library directly from PyPI:
 
 ```sh
-$ pip install argdeco-JoshGoA
+$ pip install argdeco-josugoar
 ```
 
 The installation into a [virtualenv](https://github.com/pypa/virtualenv) (or [pipenv](https://github.com/pypa/pipenv)) is heavily recommended.
