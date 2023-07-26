@@ -5,13 +5,13 @@ with open("README.md") as f:
 
 setuptools.setup(
     name="argdeco-josugoar",
-    version="1.4.0",
+    version="1.5.0",
     description="Opinionated argparse wrapper",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="josugoar",
     url="https://github.com/josugoar/argdeco",
-    download_url="https://github.com/josugoar/argdeco/archive/v1.4.0.tar.gz",
+    download_url="https://github.com/josugoar/argdeco/archive/v1.5.0.tar.gz",
     py_modules=["argdeco"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -19,7 +19,7 @@ setuptools.setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.11",
         "Topic :: Software Development :: Libraries :: Python Modules"
     ],
     package_data={"argdeco": ["LICENSE", "README.md"]},
@@ -27,5 +27,5 @@ setuptools.setup(
     keywords="argparse cli docker library pipenv python wrapt",
     project_urls={"Source": "https://github.com/josugoar/argdeco"},
     install_requires=["wrapt"],
-    python_requires=">=3.8"
+    python_requires=">=3.11"
 )
