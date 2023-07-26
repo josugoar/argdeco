@@ -4,9 +4,9 @@
 
 <h1></h1>
 
-> Unopinionated **argparse** wrapper
+> Opinionated **argparse** wrapper
 
-* The EXACT same decorating order as regular **argparse** MUST be respected
+* The EXACT same decorating order as regular **argparse** MUST be followed
 
 * It is recommended to install the development version directly from the repository
 
