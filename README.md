@@ -6,9 +6,9 @@
 
 > Opinionated **argparse** wrapper
 
-* The EXACT same decorating order as regular **argparse** MUST be followed
+* Follows the same decorating order as regular **argparse**
 
-* It is recommended to install the development version directly from the repository
+* Recommended to install the development version directly from the repository
 
 # Why argdeco?
 
@@ -27,7 +27,7 @@ This question is easy to answer: because there is not a single command line util
 You can get the library directly from PyPI:
 
 ```sh
-$ pip install argdeco-josugoar
+$ python -m pip install argdeco-josugoar
 ```
 
 The installation into a [virtualenv](https://github.com/pypa/virtualenv) (or [pipenv](https://github.com/pypa/pipenv)) is heavily recommended.
