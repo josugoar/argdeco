@@ -6,7 +6,7 @@ with open("README.md") as f:
 setuptools.setup(
     name="argdeco-josugoar",
     version="1.4.0",
-    description="Unopinionated argparse wrapper",
+    description="Opinionated argparse wrapper",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="josugoar",
