@@ -6,6 +6,8 @@
 
 > Opinionated **argparse** wrapper
 
+* API breaking change in later versions due to major refactor!!
+
 * Follows the same decorating order as regular **argparse**
 
 * Recommended to install the development version directly from the repository
@@ -16,7 +18,11 @@ There are so many libraries out there for writing command line utilities; why do
 
 This question is easy to answer: because there is not a single command line utility for Python out there which ticks the following boxes: ([sound familiar?](https://click.palletsprojects.com/en/7.x/why/))
 
-* supports class callback method decoration and method instance binding with class instance forwarding (thank you [Graham Dumpleton](https://github.com/GrahamDumpleton) for [wrapt](https://github.com/GrahamDumpleton/wrapt)!)
+* is fully typed using official **typeshed** **argparse** stubs
+
+* ~~supports class callback method decoration and method instance binding with class instance forwarding (thank you [Graham Dumpleton](https://github.com/GrahamDumpleton) for [wrapt](https://github.com/GrahamDumpleton/wrapt)!)~~
+
+  * or it used to. This is not supported in the current version due to being basically useless as the parser had to be a class member, instead of an instance member, anyway.
 
 * supports callback callable instance binding with **argparse** context or parser instance forwarding
 
@@ -34,15 +40,9 @@ The installation into a [virtualenv](https://github.com/pypa/virtualenv) (or [pi
 
 # API reference
 
-* **argdeco.argument_parser**(wrapped=None, parser_class=argparse.ArgumentParser, ctx=False, prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars="-", fromfile_prefix_chars=None, argument_default=None, conflict_handler="error", add_help=True, allow_abbrev=True)
+* **argdeco.argument_parser**(prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars="-", fromfile_prefix_chars=None, argument_default=None, conflict_handler="error", add_help=True, allow_abbrev=True, exit_on_error=True)
 
   * Create a new ArgumentParser object. All parameters should be passed as keyword arguments. Each parameter has its own more detailed description below, but in short they are:
-
-      * wrapped - The callback callable (default: None)
-
-      * parser_class - The class to instantiate the parser (default: argparse.ArgumentParser)
-
-      * ctx - Pass the **argparse** context or parser instance to the callback callable (default: False)
 
       * prog - The name of the program (default: sys.argv[0])
 
@@ -68,10 +68,12 @@ The installation into a [virtualenv](https://github.com/pypa/virtualenv) (or [pi
 
       * allow_abbrev - Allows long options to be abbreviated if the abbreviation is unambiguous. (default: True)
 
+      * exit_on_error - Determines whether or not ArgumentParser exits with error info when an error occurs. (default: True)
+
 ```py
 >>> import argdeco
 >>> @argdeco.add_argument("--foo", help="foo help")
-... @argdeco.argument_parser
+... @argdeco.argument_parser()
 ... def parser(foo):
 ...     pass
 ...
@@ -114,13 +116,11 @@ optional arguments:
 
     * dest - The name of the attribute to be added to the object returned by parse_args().
 
-* **argdeco.add_subparsers**(wrapped=None, [title][, description][, prog][, parser_class][, action][, option_string][, dest][, required][, help][, metavar])
+* **argdeco.add_subparsers**([title][, description][, prog][, parser_class][, action][, option_string][, dest][, required][, help][, metavar])
 
   * Many programs split up their functionality into a number of sub-commands, for example, the svn program can invoke sub-commands like svn checkout, svn update, and svn commit. Splitting up functionality this way can be a particularly good idea when a program performs several different functions which require different kinds of command-line arguments. ArgumentParser supports the creation of such sub-commands with the add_subparsers() method. The add_subparsers() method is normally called with no arguments and returns a special action object. This object has a single method, add_parser(), which takes a command name and any ArgumentParser constructor arguments, and returns an ArgumentParser object that can be modified as usual.
 
   * Description of parameters:
-
-    * wrapped - The callback callable (default: None)
 
     * title - title for the sub-parser group in help output; by default “subcommands” if description is provided, otherwise uses title for positional arguments
 
@@ -183,7 +183,7 @@ parser_b
 
 * **argdeco.add_argument_group**(title=None, description=None)
 
-  * By default, ArgumentParser groups command-line arguments into “positional arguments” and “optional arguments” when displaying help messages. When there is a better conceptual grouping of arguments than this default one, appropriate groups can be created using the add_argument_group() method:
+  * By default, ArgumentParser groups command-line arguments into “positional arguments” and “optional arguments” when displaying help messages. When there is a better conceptual grouping of arguments than this default one, appropriate groups can be created using the add_argument_group() method. The last added argument group in the decorator chain will be the one receiving the subsequently added arguments.
 
 ```py
 >>> @argdeco.add_argument("bar", group="group", help="bar help")
@@ -224,33 +224,33 @@ PROG: error: argument --bar: not allowed with argument --foo
 
 ## Accessing attributes
 
-**argdeco** does NOT override decorated functions so that they can be accessed by the user easily if needed. In order to access the **argparse** context or parser instance, it is recommended to use context forwarding.
+**argdeco** makes it so that each decorated function is converted to an **argparse** parser, so that further customization can be achieved by calling the proper original methods.
 
 ```py
->>> @argdeco.argument_parser
+>>> @argdeco.argument_parser()
 ... def prog(self):
 ...     pass
 ...
->>> prog.__wrapped__
+>>> prog._wrapped_
 <function prog at 0x0000029BCBFABF70>
->>> prog.parser
-ArgumentParser(prog="argdeco.py", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
+>>> prog
+_ArgumentParser(prog="argdeco.py", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
 ```
 
-## Class method decoration
+## Class method decoration **NO LONGER SUPPORTED**
 
-**argdeco** supports class callback method decoration, unlike the big majority of CLI decorator libraries, without any difference as regular callback callable decoration.
+~~argdeco supports class callback method decoration, unlike the big majority of CLI decorator libraries, without any difference as regular callback callable decoration.~~
 
 ```py
 >>> class Prog:
 ...
-...     @argdeco.argument_parser
+...     @argdeco.argument_parser()
 ...     def parser(self):
 ...         pass
 ...
 ```
 
-Decorating a class will forward the arguments to the *\_\_init__* method (usually not the desired behaviour), as decorated callbacks will ALWAYS be treated as callables.
+~~Decorating a class will forward the arguments to the *\_\_init__* method (usually not the desired behaviour), as decorated callbacks will ALWAYS be treated as callables.~~
 
 ```py
 >>> @argdeco.argument_parser
@@ -259,7 +259,7 @@ Decorating a class will forward the arguments to the *\_\_init__* method (usuall
 ...
 ```
 
-Decorating the *\_\_call__* method will forward the arguments to the class itself, following standard decorator usage as specified by [wrapt](https://wrapt.readthedocs.io/en/latest/decorators.html#decorating-class-methods).
+~~Decorating the *\_\_call__* method will forward the arguments to the class itself, following standard decorator usage as specified by [wrapt](https://wrapt.readthedocs.io/en/latest/decorators.html#decorating-class-methods).~~
 
 ```py
 >>> class Prog:
@@ -270,14 +270,16 @@ Decorating the *\_\_call__* method will forward the arguments to the class itsel
 ...
 ```
 
-## Context forwarding
+Staticmethods, however, are supported, as they are not bound to the class.
+
+## Context forwarding **IMPROVED**
 
 Decorated callback callables can get access to the **argparse** context or parser instance.
 
 ```py
->>> @argdeco.argument_parser(ctx=True, prog="PROG")
-... def parser(ctx):
-...     ctx.print_help()
+>>> @argdeco.argument_parser(prog="PROG")
+... def parser():
+...     parser.print_help()
 ...
 >>> parser([])
 usage: PROG [-h]
@@ -286,7 +288,7 @@ optional arguments:
   -h, --help  show this help message and exit
 ```
 
-Class callback method context or parser instance forwarding is still respected on decorated class methods.
+~~Class callback method context or parser instance forwarding is still respected on decorated class methods.~~
 
 ```py
 >>> class Prog:
