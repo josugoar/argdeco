@@ -19,7 +19,7 @@ setuptools.setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Software Development :: Libraries :: Python Modules"
     ],
     package_data={"argdeco": ["LICENSE", "README.md"]},
@@ -27,5 +27,5 @@ setuptools.setup(
     keywords="argparse cli docker library pipenv python wrapt",
     project_urls={"Source": "https://github.com/josugoar/argdeco"},
     install_requires=["wrapt"],
-    python_requires=">=3.11"
+    python_requires=">=3.9"
 )
