@@ -1,86 +1,121 @@
 import argparse
-import functools
-import types
-
-import wrapt
 
 
-class ArgumentDecorator(wrapt.FunctionWrapper):
+def argument_parser(prog=None,
+                    usage=None,
+                    description=None,
+                    epilog=None,
+                    parents=[],
+                    formatter_class=argparse.HelpFormatter,
+                    prefix_chars='-',
+                    fromfile_prefix_chars=None,
+                    argument_default=None,
+                    conflict_handler='error',
+                    add_help=True,
+                    allow_abbrev=True,
+                    exit_on_error=True):
 
-    def __init__(self, /, wrapped, enabled=None, *,
-                 parser=argparse.ArgumentParser(), ctx=False):
-        super().__init__(wrapped, self.wrapper, enabled)
-        self.parser = parser
-        self._containers = {}
-        self._self_ctx = ctx
+    def wrapper(wrapped):
+        return _ArgumentParser(wrapped=wrapped,
+                               prog=prog,
+                               usage=usage,
+                               description=description,
+                               epilog=epilog,
+                               parents=parents,
+                               formatter_class=formatter_class,
+                               prefix_chars=prefix_chars,
+                               fromfile_prefix_chars=fromfile_prefix_chars,
+                               argument_default=argument_default,
+                               conflict_handler=conflict_handler,
+                               add_help=add_help,
+                               allow_abbrev=allow_abbrev,
+                               exit_on_error=exit_on_error)
 
-    def wrapper(self, wrapped, instance, args, kwargs, /):
-        namespace = vars(self.parser.parse_args(*args, **kwargs))
-        default = namespace.pop("default", None)
-        if default is not None:
-            wrapped = types.MethodType(default, instance)
-        if self._self_ctx:
-            wrapped = types.MethodType(wrapped, self.parser)
-        return wrapped(**namespace)
-
-
-def add_argument(*args, group=None, **kwargs):
-    return _add_container_actions(argparse._ActionsContainer.add_argument,
-                                  *args, parent=group, **kwargs)
-
-
-def add_argument_group(name, /, *args, group=None, **kwargs):
-    kwargs.setdefault("title", name)
-    return _add_container_actions(argparse._ActionsContainer.add_argument_group,
-                                  *args, parent=group, child=name, **kwargs)
-
-
-def add_mutually_exclusive_group(name, /, *, group=None, **kwargs):
-    return _add_container_actions(argparse._ActionsContainer.add_mutually_exclusive_group,
-                                  parent=group, child=name, **kwargs)
+    return wrapper
 
 
-def _add_container_actions(add, /, *args, parent=None, child=None, **kwargs):
+def add_argument(*args, **kwargs):
 
-    def wrapper(wrapped, /):
-        instance = wrapped.parser if parent is None else wrapped._containers[parent]
-        container = add(instance, *args, **kwargs)
-        if child is not None:
-            wrapped._containers[child] = container
+    def wrapper(wrapped):
+        kwargs.setdefault("description", wrapped.__doc__)
+        wrapped._container.add_argument(*args, **kwargs)
         return wrapped
 
     return wrapper
 
 
-def argument_parser(wrapped=None, /, *, parser_class=argparse.ArgumentParser,
-                    ctx=False, **kwargs):
-    if wrapped is None:
-        return functools.partial(argument_parser, parser_class=parser_class,
-                                 ctx=ctx, **kwargs)
-    kwargs.setdefault("description", wrapped.__doc__)
-    parser = parser_class(**kwargs)
-    return ArgumentDecorator(wrapped, parser=parser, ctx=ctx)
+def add_argument_group(*args, **kwargs):
 
-
-def add_subparsers(wrapped=None, /, **kwargs):
-    if wrapped is None:
-        return functools.partial(add_subparsers, **kwargs)
-    kwargs.setdefault("parser_class", wrapped.parser.__class__)
-    wrapper = _add_container_actions(argparse.ArgumentParser.add_subparsers,
-                                     **kwargs)
-    return wrapper(wrapped)
-
-
-def add_parser(parent, /, name=None, ctx=False, **kwargs):
-
-    def wrapper(wrapped, /):
-        subcommand = wrapped.__name__ if name is None else name
-        kwargs.setdefault("description", wrapped.__doc__)
-        for action in parent.parser._subparsers._actions:
-            if isinstance(action, argparse._SubParsersAction):
-                parser = action.add_parser(subcommand, **kwargs)
-                child = ArgumentDecorator(wrapped, ctx=ctx, parser=parser)
-                parser.set_defaults(default=wrapped)
-                return child
+    def wrapper(wrapped):
+        wrapped._container = wrapped.add_argument_group(*args, **kwargs)
+        return wrapped
 
     return wrapper
+
+
+def add_mutully_exclusive_argument_group(**kwargs):
+
+    def wrapper(wrapped):
+        wrapped._container = wrapped.add_mutully_exclusive_argument_group(
+            **kwargs)
+        return wrapped
+
+    return wrapper
+
+
+def add_subparsers(**kwargs):
+
+    def wrapper(wrapped):
+        wrapped._subparser = wrapped.add_subparsers(**kwargs)
+        return wrapped
+
+    return wrapper
+
+
+def add_parser(parser, name, **kwargs):
+
+    def wrapper(wrapped):
+        return parser._subparser.add_parser(name, wrapped=wrapped, **kwargs)
+
+    return wrapper
+
+
+class _ArgumentParser(argparse.ArgumentParser):
+
+    def __init__(self,
+                 *,
+                 wrapped,
+                 prog=None,
+                 usage=None,
+                 description=None,
+                 epilog=None,
+                 parents=[],
+                 formatter_class=argparse.HelpFormatter,
+                 prefix_chars='-',
+                 fromfile_prefix_chars=None,
+                 argument_default=None,
+                 conflict_handler='error',
+                 add_help=True,
+                 allow_abbrev=True,
+                 exit_on_error=True):
+        super().__init__(prog=prog,
+                         usage=usage,
+                         description=description,
+                         epilog=epilog,
+                         parents=parents,
+                         formatter_class=formatter_class,
+                         prefix_chars=prefix_chars,
+                         fromfile_prefix_chars=fromfile_prefix_chars,
+                         argument_default=argument_default,
+                         conflict_handler=conflict_handler,
+                         add_help=add_help,
+                         allow_abbrev=allow_abbrev,
+                         exit_on_error=exit_on_error)
+
+        self._wrapped = wrapped
+
+        self._actions_container = self
+        self._subparsers_action = None
+
+    def __call__(self, args=None, namespace=None):
+        return self._wrapped(**vars(self.parse_args(args=args, namespace=namespace)))

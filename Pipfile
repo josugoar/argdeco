@@ -13,8 +13,5 @@ autopep8 = "*"
 pylint = "*"
 twine = "*"
 
-[packages]
-wrapt = "*"
-
 [requires]
-python_version = "3.8"
+python_version = "3.9"
