@@ -1,0 +1,20 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "python setup.py sdist bdist_wheel"
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": "python -m twine upload --repository testpypi dist/*"
+        },
+        {
+            "label": "upload",
+            "type": "shell",
+            "command": "python -m twine upload dist/*"
+        }
+    ]
+}
