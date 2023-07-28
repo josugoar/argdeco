@@ -257,7 +257,7 @@ PROG: error: argument --bar: not allowed with argument --foo
 >>> prog.__wrapped__
 <function prog at 0x0000029BCBFABF70>
 >>> prog
-_ArgumentParser(prog="argdeco.py", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
+ArgumentParser(prog="argdeco.py", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
 ```
 
 ## Class method decoration
