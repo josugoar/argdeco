@@ -25,11 +25,12 @@
                 "python.linting.pylintPath": "/usr/local/py-utils/bin/pylint"
             },
             "extensions": [
-                "ms-python.python",
-                "ms-python.vscode-pylance"
-            ]
+				"ms-python.python",
+				"ms-python.mypy-type-checker",
+				"ms-toolsai.jupyter"
+			]
         }
     },
-    "postCreateCommand": "pipenv install --dev",
+    "onCreateCommand": "pip install -r requirements_dev.txt",
     "remoteUser": "vscode"
 }

@@ -20,9 +20,7 @@ This question is easy to answer: because there is not a single command line util
 
 * is fully typed using official **typeshed** **argparse** stubs
 
-* ~~supports class callback method decoration and method instance binding with class instance forwarding (thank you [Graham Dumpleton](https://github.com/GrahamDumpleton) for [wrapt](https://github.com/GrahamDumpleton/wrapt)!)~~
-
-  * or it used to. This is not supported in the current version due to being basically useless as the parser had to be a class member, instead of an instance member, anyway.
+* supports class callback method decoration and method instance binding with class instance forwarding
 
 * supports callback callable instance binding with **argparse** context or parser instance forwarding
 
@@ -162,7 +160,7 @@ optional arguments:
 ```
 
 ```py
->>> # create the parser for the "a" command
+>>> # create the parser for the "b" command
 >>> @argdeco.add_argument("--baz", choices="XYZ", help="baz help")
 ... @argdeco.add_parser(parser, "b", help="b help")
 ... def parser_b(**kwargs):
@@ -186,9 +184,9 @@ parser_b
   * By default, ArgumentParser groups command-line arguments into “positional arguments” and “optional arguments” when displaying help messages. When there is a better conceptual grouping of arguments than this default one, appropriate groups can be created using the add_argument_group() method. The last added argument group in the decorator chain will be the one receiving the subsequently added arguments.
 
 ```py
->>> @argdeco.add_argument("bar", group="group", help="bar help")
-... @argdeco.add_argument("--foo", group="group", help="foo help")
-... @argdeco.add_argument_group("group")
+>>> @argdeco.add_argument("bar", help="bar help")
+... @argdeco.add_argument("--foo", help="foo help")
+... @argdeco.add_argument_group(title="group")
 ... @argdeco.argument_parser(prog="PROG", add_help=False)
 ... def parser(**kwargs):
 ...     pass
@@ -201,12 +199,37 @@ group:
   --foo FOO  foo help
 ```
 
+  * Group are defined in order and arguments are added to the last group in the chain.
+
+```py
+>>> @argdeco.add_argument("bar2", help="bar help")
+... @argdeco.add_argument("--foo2", help="foo help")
+... @argdeco.add_argument_group(title="group2")
+... @argdeco.add_argument("bar1", help="bar help")
+... @argdeco.add_argument("--foo1", help="foo help")
+... @argdeco.add_argument_group(title="group1")
+... @argdeco.argument_parser(prog="PROG", add_help=False)
+... def parser(**kwargs):
+...     pass
+...
+>>> parser.print_help()
+usage: PROG [--foo1 FOO1] [--foo2 FOO2] bar1 bar2
+
+group1:
+  --foo1 FOO1  foo help
+  bar1         bar help
+
+group2:
+  --foo2 FOO2  foo help
+  bar2         bar help
+```
+
 * **ardeco.add_mutually_exclusive_group**(required=False)
 
 ```py
->>> @argdeco.add_argument("--bar", group="group", action="store_false")
-... @argdeco.add_argument("--foo", group="group", action="store_true")
-... @argdeco.add_mutually_exclusive_group("group")
+>>> @argdeco.add_argument("--bar", action="store_false")
+... @argdeco.add_argument("--foo", action="store_true")
+... @argdeco.add_mutually_exclusive_group()
 ... @argdeco.argument_parser(prog="PROG")
 ... def parser(**kwargs):
 ...     print(kwargs)
@@ -231,15 +254,15 @@ PROG: error: argument --bar: not allowed with argument --foo
 ... def prog(self):
 ...     pass
 ...
->>> prog._wrapped_
+>>> prog.__wrapped__
 <function prog at 0x0000029BCBFABF70>
 >>> prog
 _ArgumentParser(prog="argdeco.py", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
 ```
 
-## Class method decoration **NO LONGER SUPPORTED**
+## Class method decoration
 
-~~argdeco supports class callback method decoration, unlike the big majority of CLI decorator libraries, without any difference as regular callback callable decoration.~~
+argdeco supports class callback method decoration, unlike the big majority of CLI decorator libraries, without any difference as regular callback callable decoration.
 
 ```py
 >>> class Prog:
@@ -250,29 +273,27 @@ _ArgumentParser(prog="argdeco.py", usage=None, description=None, formatter_class
 ...
 ```
 
-~~Decorating a class will forward the arguments to the *\_\_init__* method (usually not the desired behaviour), as decorated callbacks will ALWAYS be treated as callables.~~
+Decorating a class will forward the arguments to the *\_\_init__* method (usually not the desired behaviour), as decorated callbacks will ALWAYS be treated as callables.
 
 ```py
->>> @argdeco.argument_parser
+>>> @argdeco.argument_parser()
 ... class Prog:
 ...     pass
 ...
 ```
 
-~~Decorating the *\_\_call__* method will forward the arguments to the class itself, following standard decorator usage as specified by [wrapt](https://wrapt.readthedocs.io/en/latest/decorators.html#decorating-class-methods).~~
+Decorating the *\_\_call__* method will forward the arguments to the class itself.
 
 ```py
 >>> class Prog:
 ...
-...     @argdeco.argument_parser
+...     @argdeco.argument_parser()
 ...     def __call__(self):
 ...         pass
 ...
 ```
 
-Staticmethods, however, are supported, as they are not bound to the class.
-
-## Context forwarding **IMPROVED**
+## Context forwarding
 
 Decorated callback callables can get access to the **argparse** context or parser instance.
 
@@ -288,14 +309,14 @@ optional arguments:
   -h, --help  show this help message and exit
 ```
 
-~~Class callback method context or parser instance forwarding is still respected on decorated class methods.~~
+Class callback method context or parser instance forwarding is still respected on decorated class methods.
 
 ```py
 >>> class Prog:
 ...
-...     @argdeco.argument_parser(ctx=True, prog="PROG")
-...     def __call__(self, ctx):
-...         ctx.print_help()
+...     @argdeco.argument_parser(prog="PROG")
+...     def __call__(self):
+...         Prog.__call__.print_help()
 ...
 >>> prog = Prog()
 >>> prog([])
