@@ -23,4 +23,4 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - uses: ricardochaves/python-lint@v1.4.0
       with:
-        use-mypy: false
+        use-mypy: true
