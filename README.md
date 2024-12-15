@@ -1,3 +1,5 @@
+# argdeco
+
 <p align="center">
   <img src="assets/argdeco.png" alt="argdeco" width="640" height="320" />
 </p>
@@ -12,7 +14,7 @@
 
 * Recommended to install the development version directly from the repository
 
-# Why argdeco?
+## Why argdeco?
 
 There are so many libraries out there for writing command line utilities; why does **argdeco** exist?
 
@@ -26,7 +28,7 @@ This question is easy to answer: because there is not a single command line util
 
 * shares the EXACT same API as **argparse** using decorators
 
-# Installation
+## Installation
 
 You can get the library directly from PyPI:
 
@@ -36,7 +38,7 @@ $ python -m pip install argdeco-josugoar
 
 The installation into a [virtualenv](https://github.com/pypa/virtualenv) (or [pipenv](https://github.com/pypa/pipenv)) is heavily recommended.
 
-# API reference
+## API reference
 
 * **argdeco.argument_parser**(prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars="-", fromfile_prefix_chars=None, argument_default=None, conflict_handler="error", add_help=True, allow_abbrev=True, exit_on_error=True)
 
@@ -243,9 +245,9 @@ usage: PROG [-h] [--foo | --bar]
 PROG: error: argument --bar: not allowed with argument --foo
 ```
 
-# Advanced usage
+## Advanced usage
 
-## Accessing attributes
+### Accessing attributes
 
 **argdeco** makes it so that each decorated function is converted to an **argparse** parser, so that further customization can be achieved by calling the proper original methods.
 
@@ -260,7 +262,7 @@ PROG: error: argument --bar: not allowed with argument --foo
 ArgumentParser(prog="argdeco.py", usage=None, description=None, formatter_class=<class "argparse.HelpFormatter">, conflict_handler="error", add_help=True)
 ```
 
-## Class method decoration
+### Class method decoration
 
 argdeco supports class callback method decoration, unlike the big majority of CLI decorator libraries, without any difference as regular callback callable decoration.
 
@@ -293,7 +295,7 @@ Decorating the *\_\_call__* method will forward the arguments to the class itsel
 ...
 ```
 
-## Context forwarding
+### Context forwarding
 
 Decorated callback callables can get access to the **argparse** context or parser instance.
 
